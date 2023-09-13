@@ -1,3 +1,9 @@
+'''
+Date: 2023-08-04
+Description:
+    Helper function for processing patch data
+Mostly copy-paste from https://arxiv.org/abs/2304.03977
+'''
 import torch
 import torch.nn.functional as F
 
