@@ -154,10 +154,13 @@ def get_ips_dataset(data_root=r'/shared/projects/autoencoder/rawdata/2023-08-21.
                         transforms.ToTensor(),
                         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
                     ]),
-                    transform_output='simple'
+                    transform_output='simple',
+                    downstream_task='3typesclassification',
+                    label_type='label_time',
+                    sample_id=False
                 ):
     csv_file = os.path.join(data_root, csv_file)
-    all_dataset = iPSImageDataset(data_root, csv_file, transform=transform, transform_output='simple', downstream_task='3typesclassification', label_type='label_time', sample_id=False)
+    all_dataset = iPSImageDataset(data_root, csv_file, transform=transform, transform_output=transform_output, downstream_task=downstream_task, label_type=label_type, sample_id=sample_id)
     return all_dataset
 
 def getDatasetStat(dataloader):

@@ -1,9 +1,3 @@
-'''
-Date: 2023-08-04
-Description:
-    Helper function for processing patch data
-Mostly copy-paste from https://arxiv.org/abs/2304.03977
-'''
 import torch
 import torch.nn.functional as F
 
@@ -14,6 +8,14 @@ def chunk_avg(x,n_chunks=2,normalize=False):
         return x.mean(0)
     else:
         return F.normalize(x.mean(0),dim=1)
+    
+def local_chunk_avg(x,n_chunks=2,normalize=False):
+    x_list = x.chunk(n_chunks,dim=0)
+    local = torch.stack(x_list[1:],dim=0)
+    if not normalize:
+        return local.mean(0)
+    else:
+        return F.normalize(local.mean(0),dim=1)
     
 def cal_TCR(z, criterion, num_patches):
     z_list = z.chunk(num_patches,dim=0)
