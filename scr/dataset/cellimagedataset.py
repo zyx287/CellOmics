@@ -77,6 +77,8 @@ class iPSImageDataset(Dataset):
         self.sample_id = sample_id # Determine whether to return sample_id (Main key for dataframe)
         self.downstream_task = downstream_task
         self.label_type = label_type
+        if self.downstream_task == '2typesclassification' or self.downstream_task == '2typesPCAregression' or self.downstream_task == '2typesLevelregression':
+            self.data_df = self.data_df[self.data_df['cell_kind'] == 0]
 
     def __len__(self):
         return len(self.data_df)
@@ -103,7 +105,6 @@ class iPSImageDataset(Dataset):
             else:
                 raise NameError(f"{self.label_type} is not a valid label type for iPS-RPE dataset")
         elif self.downstream_task == '2typesclassification' or self.downstream_task == '2typesPCAregression' or self.downstream_task == '2typesLevelregression':
-            self.data_df = self.data_df[self.data_df['cell_kind'] == 0]
             img_name = self.data_df.iloc[idx, 0]
             z_index = self.data_df.iloc[idx, 2]
             image = Image.open(os.path.join(self.data_root, f'{z_index}', img_name)).convert('RGB')
