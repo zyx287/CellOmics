@@ -138,22 +138,38 @@ class RegionAugmentation(object):
         Return: a tensor group of augmented images
         Parameters in Normalize can be calculated using getDatasetStat function (in cellimagedataset.py, seed=3, k_fold=5)
         '''
-        global_compose = [transforms.CenterCrop(80),
-                            transforms.Resize((224, 224)),
-                            transforms.ToTensor()]
-        local_compose = [transforms.CenterCrop(100),
-                            transforms.RandomResizedCrop(224, scale=(0.8, 0.8)),
-                            transforms.RandomHorizontalFlip(p=0.5),
-                            transforms.RandomVerticalFlip(p=0.5),
-                            transforms.RandomGrayscale(p=0.2),
-                            transforms.ToTensor()]
-        if self.normalize:
-            global_compose.append(transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]))
-            local_compose.append(transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]))
-        global_aug_transform = transforms.Compose(global_compose)
-        local_aug_transform = transforms.Compose(local_compose)
+        if self.version == 'v3':
+            global_compose = [transforms.CenterCrop(60),
+                                transforms.Resize((224, 224)),
+                                transforms.ToTensor()]
+            local_compose = [transforms.CenterCrop(60),
+                                transforms.RandomResizedCrop(224, scale=(0.5, 0.5)),
+                                transforms.RandomHorizontalFlip(p=0.5),
+                                transforms.RandomVerticalFlip(p=0.5),
+                                # transforms.RandomGrayscale(p=0.2),
+                                transforms.ToTensor()]
+            if self.normalize:
+                global_compose.append(transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]))
+                local_compose.append(transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]))
+            global_aug_transform = transforms.Compose(global_compose)
+            local_aug_transform = transforms.Compose(local_compose)
+        else:
+            global_compose = [transforms.CenterCrop(80),
+                                transforms.Resize((224, 224)),
+                                transforms.ToTensor()]
+            local_compose = [transforms.CenterCrop(100),
+                                transforms.RandomResizedCrop(224, scale=(0.8, 0.8)),
+                                transforms.RandomHorizontalFlip(p=0.5),
+                                transforms.RandomVerticalFlip(p=0.5),
+                                transforms.RandomGrayscale(p=0.2),
+                                transforms.ToTensor()]
+            if self.normalize:
+                global_compose.append(transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]))
+                local_compose.append(transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]))
+            global_aug_transform = transforms.Compose(global_compose)
+            local_aug_transform = transforms.Compose(local_compose)
         # Process the image
-        if self.version == 'v2':
+        if self.version == 'v2' or self.version == 'v3':
             # Global + Local
             augmented = [global_aug_transform(x)]
             for _ in range(self.num_patch - 1):

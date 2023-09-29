@@ -48,7 +48,7 @@ parser.add_argument('--kfold', type=int, default=5,
                     help='kfold (default: 5)')
 parser.add_argument('--transform_type', type=str, default="simple",
                     help='transform_type parameter for dataset-datasets.py-load_dataset (default: simple)',
-                    choices=['simple', 'mask-v1', 'mask-v2', 'region-v1', 'region-v2'])
+                    choices=['simple', 'mask-v1', 'mask-v2', 'region-v1', 'region-v2','region-v3'])
 parser.add_argument('--normalize', type=bool, default=False,
                     help='normalize parameter for dataset-datasets.py-load_dataset (default: False)')
 # Dataset and Dataloader
@@ -61,7 +61,7 @@ parser.add_argument('--data', type=str, default="ips-cell",
 # Model
 parser.add_argument('--arch', type=str, default="resnet18-cellimage",
                     help='network architecture (default: resnet18-cellimage)',
-                    choices=['resnet18-cellimage', 'vit-in21k'])     
+                    choices=['resnet18-cellimage', 'vit-in21k', 'vit-in21k-noproj'])     
 # Training setting
 parser.add_argument('--lr', type=float, default=0.01,
                     help='Initial learning rate')
@@ -146,7 +146,7 @@ if (args.downstream_task == 'None') or ((args.downstream_task in ['3typesclassif
 elif (args.downstream_task in ['3typesclassification','2typesclassification','3typesPCAregression','2typesPCAregression','3typesLevelregression','2typesLevelregression']) and args.ips_down:
     # Model1
     print(2)
-    model1 = AutoEncoder(encoder(z_dim=512, hidden_dim=512, arch = args.arch), Decoder(latent_dim=512))
+    model1 = AutoEncoder(encoder(z_dim=2048, hidden_dim=2048, arch = args.arch), Decoder(latent_dim=2048))
     model1 = nn.DataParallel(model1)
     model1.to(device)
     # Model2
@@ -458,7 +458,7 @@ def test_down_one_epoch(epoch, autoencoder, regressor, dataloader, writer):
 def train(train_dl, val_dl, test_dl, writer, seed):
     train_best = 99999999
     val_best = 99999999
-    if (args.data == 'ips-cell' and (args.downstream_task == '3typesclassification' or args.downstream_task == '2typesclassification') and (not args.ips_down)) or args.downstream_task == 'None':
+    if (args.data == 'ips-cell' and (args.downstream_task == '3typesclassification' or args.downstream_task == '2typesclassification') and (not args.ips_down)) or (args.downstream_task == 'None'and args.data == 'emt-cell'):
         for epoch in range(args.epoch):
             train_loss =  train_omics_one_epoch(epoch, model1.module, train_dl, writer)
             val_loss = val_omics_one_epoch(epoch, model1.module, val_dl, writer)

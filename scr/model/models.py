@@ -35,7 +35,7 @@ class encoder(nn.Module):
         '''
         super().__init__()
         self.arch = arch
-        if arch == 'vit-in21k':
+        if arch == 'vit-in21k' or arch == 'vit-in21k-noproj':
             self.feature_extractor = ViTFeatureExtractor(model_name='google/vit-base-patch16-224-in21k')
             # self.feature_extractor = nn.DataParallel(self.feature_extractor)
             self.vit_model = ViTModel.from_pretrained('google/vit-base-patch16-224-in21k')
@@ -51,6 +51,9 @@ class encoder(nn.Module):
                 nn.Linear(hidden_dim, hidden_dim), 
                 nn.BatchNorm1d(hidden_dim), 
                 nn.ReLU(), 
+                nn.Linear(hidden_dim, z_dim)
+            )
+            self.lin = nn.Sequential(
                 nn.Linear(hidden_dim, z_dim)
             )
         else:
@@ -83,6 +86,17 @@ class encoder(nn.Module):
             feature = self.pre_feature(backbone_feature[:, 0, :])
             projection = self.projection(feature)
             z = F.normalize(projection, p=self.norm_p)
+        elif self.arch == 'vit-in21k-noproj':
+            inputs = self.feature_extractor(images=x, return_tensors='pt')
+            inputs.to(x.device)
+            vit_outputs = self.vit_model(**inputs)
+            backbone_feature = vit_outputs.last_hidden_state
+            # print(type(backbone_feature))
+            # print(backbone_feature.size())
+            # print(backbone_feature[:, 0, :].size())
+            feature = self.pre_feature(backbone_feature[:, 0, :])
+            feature = self.lin(feature)
+            z = F.normalize(feature, p=self.norm_p)
         else:
             backbone_feature = self.backbone(x)# Backbone feature extraction after fc layer
             feature = self.pre_feature(backbone_feature)# Unlinear for feature (Complete the backbone)

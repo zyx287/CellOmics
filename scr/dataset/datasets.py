@@ -18,7 +18,7 @@ from torchvision import transforms
 import matplotlib.pyplot as plt
 
 def load_dataset(data_name='emt-cell', num_patch=4,
-                transform_type='offical', normalize=False, downstream_task='None'):
+                transform_type='offical', normalize=False, downstream_task='None', sample_id=False):
     """
     Loads a dataset for training and testing.
     Parameters:
@@ -61,6 +61,9 @@ def load_dataset(data_name='emt-cell', num_patch=4,
     elif _transform_type == 'region-v2':
         from .data_augu import RegionAugmentation
         transform = RegionAugmentation(num_patch=num_patch, version='v2', normalize=normalize)
+    elif _transform_type == 'region-v3':
+        from .data_augu import RegionAugmentation
+        transform = RegionAugmentation(num_patch=num_patch, version='v3', normalize=normalize)
     else:
         raise NameError(f'No transform named {transform_type}, check dataset-datasets.py for more details!')
     if _data_name == 'emt-cell':
@@ -76,7 +79,7 @@ def load_dataset(data_name='emt-cell', num_patch=4,
             raise ValueError('Downstream task must be specified for iPS cell image dataset!')
         else:
             from .cellimagedataset import get_ips_dataset
-            dataset = get_ips_dataset(transform=transform, downstream_task=downstream_task)
+            dataset = get_ips_dataset(transform=transform, downstream_task=downstream_task, sample_id=sample_id)
     else:
         raise NameError('{} Dataset not found'.format(data_name))
     return dataset
